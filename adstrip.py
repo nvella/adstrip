@@ -21,7 +21,7 @@ tmpdir = TemporaryDirectory()
 blanks = [-BLANK_NEAR_THRESHOLD]
 
 # Collect blank frames
-cap = cv.VideoCapture('show.mkv')
+cap = cv.VideoCapture(in_file)
 i = 1
 while(cap.isOpened()):
     ret, frame = cap.read()
