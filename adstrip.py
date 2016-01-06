@@ -86,7 +86,7 @@ with open(('%s/filelist.txt' % tmpdir.name), 'w') as filelist:
         filelist.write("file %s.mkv\n" % i)
 
 print('Compiling segments...')
-os.system("ffmpeg -f concat -i %s/filelist.txt -c:v h264 -crf 18 -c:a libvo_aacenc \"%s\"" % (tmpdir.name, out_file))
+os.system("ffmpeg -f concat -i %s/filelist.txt -c:v h264 -crf 18 -c:a aac -strict -2 \"%s\"" % (tmpdir.name, out_file))
 
 print('Cleaning up...')
 tmpdir.cleanup()
