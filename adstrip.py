@@ -6,9 +6,10 @@ from tempfile import TemporaryDirectory
 
 FRAMERATE = 25
 PROG_START_THRESHOLD = 180 * FRAMERATE
-AD_BREAK_MINIMUM = 120 * FRAMERATE
+SHOW_BLOCK_MINIMUM = (3 * 60 + 30) * FRAMERATE
 BLANK_NEAR_THRESHOLD = 2 * FRAMERATE
 SEG_START_DELAY = int(1.0 * FRAMERATE)
+SEG_END_DELAY = int(0.75 * FRAMERATE)
 
 # Set params
 in_file = sys.argv[1]
@@ -52,7 +53,8 @@ in_ad = False
 while i < len(blanks):
     frame = blanks[i]
     if in_ad: # In an ad
-        if frame - blanks[i - 1] < AD_BREAK_MINIMUM:
+        #if frame - blanks[i - 1] < AD_BREAK_MINIMUM:
+        if i + 1 < len(blanks) and blanks[i + 1] - blanks[i] < SHOW_BLOCK_MINIMUM:
             print("Removing in-ad blank %i" % frame)
             blanks.pop(i)
             # i -= 1 # Wind back the for loop as we just deleted an element
@@ -72,9 +74,9 @@ i = 0
 blanks = list(zip(blanks[0::2], blanks[1::2]))
 for i in range(len(blanks)):
     start_s = (blanks[i][0] + SEG_START_DELAY) / FRAMERATE
-    end_s   = blanks[i][1] / FRAMERATE
+    end_s   = (blanks[i][1] + SEG_END_DELAY) / FRAMERATE
     time_s  = end_s - start_s
-    print("%i: %i to %i" % (i, blanks[i][0] + SEG_START_DELAY, blanks[i][1]))
+    print("%i: %i to %i" % (i, blanks[i][0] + SEG_START_DELAY, blanks[i][1] + SEG_END_DELAY))
     print("    %fs to %fs, len %fs" % (start_s, end_s, time_s))
     os.system("ffmpeg -ss %f -i %s -t %f -c:v copy -c:a copy %s/%i.mkv" % (start_s, in_file, time_s, tmpdir.name, i))
 
