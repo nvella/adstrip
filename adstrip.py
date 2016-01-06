@@ -13,7 +13,7 @@ SEG_END_DELAY = int(0.75 * FRAMERATE)
 
 # Set params
 in_file = sys.argv[1]
-out_file = sys.argv[2]
+out_files = sys.argv[2:]
 
 # Create a new tempdir
 tmpdir = TemporaryDirectory()
@@ -80,13 +80,19 @@ for i in range(len(blanks)):
     print("    %fs to %fs, len %fs" % (start_s, end_s, time_s))
     os.system("ffmpeg -ss %f -i %s -t %f -c:v copy -c:a copy %s/%i.mkv" % (start_s, in_file, time_s, tmpdir.name, i))
 
-print('Creating file list...')
-with open(('%s/filelist.txt' % tmpdir.name), 'w') as filelist:
-    for i in range(len(blanks)):
-        filelist.write("file %s.mkv\n" % i)
+# Compute how many segments belong in each file
+len_of_file = int(len(blanks) / len(out_files))
 
-print('Compiling segments...')
-os.system("ffmpeg -f concat -i %s/filelist.txt -c:v h264 -crf 18 -c:a aac -strict -2 \"%s\"" % (tmpdir.name, out_file))
+# Compile the output files
+for out_file_no in range(len(out_files)):
+    out_file = out_files[out_file_no]
+    print('Creating file list for %s' % out_file)
+    with open(('%s/filelist.txt' % tmpdir.name), 'w') as filelist:
+        for i in range(out_file_no * len_of_file, out_file_no * len_of_file + len_of_file):
+            filelist.write("file %s.mkv\n" % i)
+
+    print('Compiling segments...')
+    os.system("ffmpeg -f concat -i %s/filelist.txt -c:v h264 -crf 18 -c:a aac -strict -2 \"%s\"" % (tmpdir.name, out_file))
 
 print('Cleaning up...')
 tmpdir.cleanup()
