@@ -78,7 +78,7 @@ for i in range(len(blanks)):
     time_s  = end_s - start_s
     print("%i: %i to %i" % (i, blanks[i][0] + SEG_START_DELAY, blanks[i][1] + SEG_END_DELAY))
     print("    %fs to %fs, len %fs" % (start_s, end_s, time_s))
-    os.system("ffmpeg -ss %f -i %s -t %f -c:v copy -c:a copy %s/%i.mkv" % (start_s, in_file, time_s, tmpdir.name, i))
+    os.system("ffmpeg -ss %f -i \"%s\" -t %f -c:v copy -c:a copy %s/%i.mkv" % (start_s, in_file, time_s, tmpdir.name, i))
 
 # Compute how many segments belong in each file
 len_of_file = int(len(blanks) / len(out_files))
